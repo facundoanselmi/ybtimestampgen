@@ -1,0 +1,22 @@
+name: yt-timestamp-generator
+services:
+  mongodb:
+      image: mongo:latest
+      container_name: mongodb
+      environment:
+        - COMPOSE_PROJECT_NAME
+      command: ["--replSet", "rs1", "--bind_ip_all", "--oplogSize", "128"]
+      ports:
+          - "27017:27017"
+      volumes:
+          - mongodb_data:/data/db
+      healthcheck:
+        test: mongosh --eval "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs1',members:[{_id:0,host:'mongodb:27017'}]}).ok }" --quiet
+        interval: 5s
+        timeout: 5s
+        retries: 3
+        start_period: 10s
+      restart: always
+
+volumes:
+  mongodb_data:
